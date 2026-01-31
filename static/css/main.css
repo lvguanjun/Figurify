@@ -1,0 +1,144 @@
+/* Custom Styles for Figurify */
+
+body {
+    background: linear-gradient(135deg, #f6f8ff 0%, #f1f3ff 100%);
+    min-height: 100vh;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+/* Upload Zone */
+.upload-zone .border-dashed {
+    border-style: dashed !important;
+    transition: all 0.3s ease;
+}
+
+.upload-zone .border-dashed:hover,
+.upload-zone .border-dashed.dragover {
+    border-color: #0d6efd !important;
+    background-color: #eef4ff !important;
+}
+
+/* Image List Grid */
+.image-list-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+    min-height: 150px;
+}
+
+.image-item {
+    position: relative;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background: white;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: move;
+}
+
+.image-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.image-item.dragging {
+    opacity: 0.5;
+}
+
+.image-item img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+}
+
+.image-item .order-badge {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    background: #0d6efd;
+    color: white;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: bold;
+    z-index: 2;
+}
+
+.image-item .actions {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    display: flex;
+    gap: 0.25rem;
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.image-item:hover .actions {
+    opacity: 1;
+}
+
+.image-item .action-btn {
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+    cursor: pointer;
+    box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.2);
+}
+
+.action-btn.edit { background: #198754; color: white; }
+.action-btn.delete { background: #dc3545; color: white; }
+
+.image-item .filename {
+    padding: 0.5rem;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+    background: white;
+    color: #6c757d;
+}
+
+/* Color Swatches */
+.color-swatch {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.color-swatch:hover {
+    transform: scale(1.1);
+}
+
+.color-swatch.selected {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+}
+
+/* Editor */
+.editor-container {
+    box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.5);
+    background: white;
+}
+
+/* Utilities */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
+}

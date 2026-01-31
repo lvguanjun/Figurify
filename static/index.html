@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Figurify - 学术图片拼接工具</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body class="bg-light">
+    <div class="container-fluid py-4">
+        <header class="text-center mb-4">
+            <h1 class="display-5 fw-bold text-primary">📸 Figurify</h1>
+            <p class="text-muted">学术论文图片拼接工具 - 专业、简洁、高效</p>
+        </header>
+
+        <main class="row g-4">
+            <!-- 左侧面板：图片管理 -->
+            <section class="col-xl-7">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white py-3">
+                        <h2 class="h5 mb-0">📤 上传与管理</h2>
+                    </div>
+                    <div class="card-body">
+                        <!-- 上传区域 -->
+                        <div id="uploadZone" class="upload-zone mb-4">
+                            <div class="text-center py-5 border border-2 border-dashed rounded-3 bg-light cursor-pointer">
+                                <div class="display-4 mb-2">📁</div>
+                                <p class="mb-1">点击或拖拽图片到此处上传</p>
+                                <p class="small text-muted">支持 JPG, PNG, BMP, TIFF 格式</p>
+                                <input type="file" id="fileInput" multiple accept="image/*" class="d-none">
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h3 class="h6 mb-0">🖼️ 图片列表 (拖拽排序)</h3>
+                            <button id="clearAllBtn" class="btn btn-sm btn-outline-danger">🗑️ 清空所有</button>
+                        </div>
+
+                        <!-- 图片列表容器 -->
+                        <div id="imageList" class="image-list-grid">
+                            <div class="text-center py-5 text-muted w-100">
+                                <p>暂无图片，请上传</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 右侧面板：设置与预览 -->
+            <section class="col-xl-5">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h2 class="h5 mb-0">⚙️ 拼接设置</h2>
+                    </div>
+                    <div id="settingsPanel" class="card-body">
+                        <!-- 设置表单由 SettingsPanel.js 填充或管理 -->
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label fw-bold">背景颜色</label>
+                                <div id="colorPicker" class="d-flex gap-2 flex-wrap">
+                                    <div class="color-swatch selected" data-color="white" style="background-color: #ffffff; border: 1px solid #dee2e6;" title="纯白"></div>
+                                    <div class="color-swatch" data-color="light_gray" style="background-color: #f5f5f5;" title="浅灰"></div>
+                                    <div class="color-swatch" data-color="cream" style="background-color: #fffdf8;" title="米白"></div>
+                                    <div class="color-swatch" data-color="light_blue" style="background-color: #f0f8ff;" title="浅蓝"></div>
+                                    <div class="color-swatch" data-color="light_green" style="background-color: #f5fff0;" title="浅绿"></div>
+                                    <div id="customColorSwatch" class="color-swatch d-none" data-color="custom" style="background-color: #ffffff; border: 2px dashed #0d6efd;" title="自定义颜色"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="maxCols" class="form-label fw-bold">每行图片数</label>
+                                <input type="number" id="maxCols" class="form-control" value="3" min="1" max="10">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="baseHeight" class="form-label fw-bold">图片高度 (px)</label>
+                                <input type="number" id="baseHeight" class="form-control" value="600" min="200" max="2000">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="padding" class="form-label fw-bold">图片间距 (px)</label>
+                                <input type="number" id="padding" class="form-control" value="50" min="10" max="200">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="fontSize" class="form-label fw-bold">标签字号</label>
+                                <input type="number" id="fontSize" class="form-control" value="45" min="20" max="100">
+                            </div>
+
+                            <div class="col-12">
+                                <label for="labelStyle" class="form-label fw-bold">标签样式</label>
+                                <select id="labelStyle" class="form-select">
+                                    <option value="number">数字 (1, 2, 3...)</option>
+                                    <option value="letter">字母 (a, b, c...)</option>
+                                    <option value="roman">罗马数字 (i, ii, iii...)</option>
+                                    <option value="parenthesis">带括号 ((1), (2), (3)...)</option>
+                                    <option value="none">无标签</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button id="generateBtn" class="btn btn-primary w-100 mt-4 py-2 fw-bold shadow-sm" disabled>
+                            🎨 生成拼接图
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 预览区域 -->
+                <div id="previewContainer" class="card shadow-sm d-none">
+                    <div class="card-header bg-white py-3">
+                        <h2 class="h5 mb-0">✨ 预览结果</h2>
+                    </div>
+                    <div class="card-body text-center">
+                        <img id="previewImage" src="" alt="预览" class="img-fluid rounded border mb-3">
+                        <div>
+                            <a id="downloadLink" href="" download="combined_figure.jpg" class="btn btn-success fw-bold px-4">
+                                ⬇️ 下载高清大图
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 加载指示器 -->
+                <div id="loadingIndicator" class="text-center py-4 d-none">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2 text-muted">正在生成，请稍候...</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 编辑模态框 -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">✏️ 编辑图片</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0 bg-dark overflow-auto text-center" style="min-height: 400px;">
+                    <div class="editor-container d-inline-block position-relative my-3">
+                        <canvas id="editorCanvas"></canvas>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-secondary tool-btn active" data-tool="brush">🖌️ 画笔</button>
+                        <button type="button" class="btn btn-outline-secondary tool-btn" data-tool="rect">⬜ 矩形</button>
+                        <button type="button" class="btn btn-outline-secondary tool-btn" data-tool="polygon">🔷 多边形</button>
+                        <button type="button" class="btn btn-outline-secondary tool-btn" data-tool="bg-remove" title="点击图片背景即可剔除该颜色">🪄 换底</button>
+                        <button type="button" class="btn btn-outline-secondary tool-btn" data-tool="picker" title="点击图片以取色作为背景/遮罩颜色">🎨 取色</button>
+                        <button type="button" class="btn btn-outline-secondary tool-btn" data-tool="clone" title="按住 Alt 点击设置采样点，然后涂抹以仿制背景">📋 仿制</button>
+                        <button type="button" class="btn btn-outline-secondary tool-btn" data-tool="eraser">🧹 橡皮擦</button>
+                        <button type="button" id="rotateLeftBtn" class="btn btn-outline-secondary tool-btn" title="逆时针旋转90度">↶ 左转</button>
+                        <button type="button" id="rotateRightBtn" class="btn btn-outline-secondary tool-btn" title="顺时针旋转90度">↷ 右转</button>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <label class="small text-muted">大小:</label>
+                            <input type="range" id="brushSize" class="form-range" style="width: 100px;" min="5" max="100" value="20">
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <select id="maskColor" class="form-select form-select-sm" style="width: 100px;">
+                                <option value="white">白色</option>
+                                <option value="light_gray">浅灰</option>
+                                <option value="cream">米白</option>
+                                <option value="light_blue">浅蓝</option>
+                                <option value="light_green">浅绿</option>
+                                <option value="custom" id="customColorOption" class="d-none">自定义</option>
+                            </select>
+                            <div id="currentColorPreview" class="rounded-circle border" style="width: 20px; height: 20px; background-color: white; flex-shrink: 0;"></div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="button" id="undoBtn" class="btn btn-sm btn-outline-secondary">↩️ 撤销</button>
+                        <button type="button" id="resetBtn" class="btn btn-sm btn-outline-secondary">🔄 重置</button>
+                        <button type="button" id="saveEditBtn" class="btn btn-primary">💾 保存修改</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast 提示容器 -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="appToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto">通知</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Fabric.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+
+    <!-- SortableJS -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+    <!-- App Scripts (ES Modules) -->
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
