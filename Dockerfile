@@ -3,11 +3,14 @@ FROM python:3.10-slim
 WORKDIR /app
 
 # 安装必要的系统库 (Pillow 需要)
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     libopenjp2-7 \
-    libtiff5 \
-    libxcb1 \
-    fonts-wqy-zenhei \
+    libtiff6 \
+    libjpeg62-turbo \
+    zlib1g \
+    libwebp7 \
+    liblcms2-2 \
+    fonts-dejavu-core \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
