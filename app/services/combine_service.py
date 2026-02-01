@@ -1,3 +1,5 @@
+import io
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import List, Optional, Tuple
 
@@ -9,6 +11,29 @@ from app.utils.image_processor import apply_background
 
 
 class CombineService:
+    @staticmethod
+    def _process_single_image(
+        item: Tuple[Image.Image, str], bg_color: Tuple[int, int, int], base_height: int
+    ) -> Image.Image:
+        """
+        并行处理单个图片的缩放和背景
+        """
+        img, filename = item
+        # 应用背景
+        img = apply_background(img, bg_color)
+
+        # 统一高度
+        aspect_ratio = img.width / img.height
+        new_w = int(base_height * aspect_ratio)
+
+        # 智能选择缩放算法：对于常规尺寸使用 BICUBIC，对于超大图（出版级）考虑质量优先
+        # 实际上 BICUBIC 在绝大多数学术场景已经足够，只有 base_height 非常大时才可能需要 LANCZOS
+        filter_type = Image.Resampling.BICUBIC
+        if base_height > 1200:
+            filter_type = Image.Resampling.LANCZOS
+
+        return img.resize((new_w, base_height), filter_type)
+
     @staticmethod
     def create_academic_figure(
         image_data_list: List[Tuple[Image.Image, str]],
@@ -27,17 +52,17 @@ class CombineService:
         if not image_data_list:
             raise ValueError("没有图片数据")
 
-        # 1. 处理图片尺寸
-        processed_images = []
-        for img, filename in image_data_list:
-            # 应用背景
-            img = apply_background(img, bg_color)
-
-            # 统一高度
-            aspect_ratio = img.width / img.height
-            new_w = int(base_height * aspect_ratio)
-            img_resized = img.resize((new_w, base_height), Image.Resampling.LANCZOS)
-            processed_images.append(img_resized)
+        # 1. 并行处理图片尺寸
+        # PIL 在 resize 时会释放 GIL，使用 ThreadPoolExecutor 可以利用多核性能
+        with ThreadPoolExecutor() as executor:
+            processed_images = list(
+                executor.map(
+                    lambda x: CombineService._process_single_image(
+                        x, bg_color, base_height
+                    ),
+                    image_data_list,
+                )
+            )
 
         # 2. 准备字体
         font = get_font(font_size)

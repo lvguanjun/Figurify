@@ -44,19 +44,16 @@ export class UploadZone {
         console.log('接收到的文件数量:', fileArray.length);
         console.log('文件列表:', fileArray.map(f => f.name));
 
-        const newImages = [];
-        let index = 0;
-        for (const file of fileArray) {
+        const processFile = async (file, index) => {
             console.log(`处理文件 ${index + 1}:`, file.name, file.type);
 
             // 检查文件是否为图片格式
-            // 注意：某些浏览器对 .tif/.tiff 文件的 MIME type 支持不一致，可能返回空字符串
             const isImageByMime = file.type.startsWith('image/');
             const isImageByExtension = /\.(jpe?g|png|gif|bmp|webp|tiff?|svg)$/i.test(file.name);
 
             if (!isImageByMime && !isImageByExtension) {
                 Toast.error(`文件 ${file.name} 不是图片格式`);
-                continue;
+                return null;
             }
 
             try {
@@ -72,19 +69,22 @@ export class UploadZone {
                     dataUrl = await this._readFileAsDataUrl(file);
                 }
 
-                newImages.push({
+                console.log(`成功读取文件 ${index + 1}:`, file.name);
+                return {
                     id: `${Date.now()}_${index}_${Math.random().toString(36).substr(2, 9)}`,
                     file: file,
                     dataUrl: dataUrl,
                     edited: false
-                });
-                console.log(`成功读取文件 ${index + 1}:`, file.name);
-                index++;
+                };
             } catch (err) {
                 console.error(`读取文件失败:`, file.name, err);
                 Toast.error(`读取文件 ${file.name} 失败: ${err.message}`);
+                return null;
             }
-        }
+        };
+
+        const results = await Promise.all(fileArray.map((file, index) => processFile(file, index)));
+        const newImages = results.filter(img => img !== null);
 
         if (newImages.length > 0) {
             console.log('准备添加图片:', newImages.length, '张');
