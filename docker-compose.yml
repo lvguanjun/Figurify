@@ -7,5 +7,5 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./tmp:/tmp
+      - ./tmp:/app/tmp
     restart: always
